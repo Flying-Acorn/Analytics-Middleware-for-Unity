@@ -11,7 +11,12 @@ namespace FlyingAcorn.Analytics.Services
     [UsedImplicitly]
     public class AppMetricaEvents : IAnalytics
     {
-        [SerializeField] public string AppKey;
+        public string AppKey;
+
+        public AppMetricaEvents(string appKey)
+        {
+            AppKey = appKey;
+        }
 
         private static bool IsFirstLaunch()
         {

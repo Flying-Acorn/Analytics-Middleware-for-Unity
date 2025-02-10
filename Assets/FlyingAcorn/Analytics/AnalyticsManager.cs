@@ -11,7 +11,8 @@ namespace FlyingAcorn.Analytics
         [SerializeField] private bool initOnAwake;
         protected static AnalyticsManager Instance;
 
-        [SerializeReference] private List<IAnalytics> services = new();
+        private List<IAnalytics> _services = new List<IAnalytics>();
+        
         protected AnalyticServiceProvider AnalyticServiceProvider;
         protected internal static bool InitCalled;
         private bool _started;
@@ -26,7 +27,7 @@ namespace FlyingAcorn.Analytics
 
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            AnalyticServiceProvider = new AnalyticServiceProvider(services);
+            AnalyticServiceProvider = new AnalyticServiceProvider(_services);
 
             if (initOnAwake)
                 Init();
@@ -153,12 +154,12 @@ namespace FlyingAcorn.Analytics
                 return null;
             }
 
-            return Instance.services.Find(s => s.GetType() == type);
+            return Instance._services.Find(s => s.GetType() == type);
         }
 
         public IAnalytics GetService([NotNull] Type type)
         {
-            return services.Find(s => s.GetType() == type);
+            return _services.Find(s => s.GetType() == type);
         }
     }
 }
