@@ -1,5 +1,52 @@
 {
   "dependencies": {
+    "com.binouze.googleusermessagingplatform": {
+      "version": "https://github.com/binouze/GoogleUserMessagingPlatform.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "b4c61fc045d7570883f7aef705b8d6b92cf9f761"
+    },
+    "com.gameanalytics.sdk": {
+      "version": "7.10.4",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.google.external-dependency-manager": "1.2.168"
+      },
+      "url": "https://package.openupm.com"
+    },
+    "com.google.external-dependency-manager": {
+      "version": "1.2.185",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://package.openupm.com"
+    },
+    "com.google.firebase.analytics": {
+      "version": "file:../GooglePackages/com.google.firebase.analytics-12.5.0.tgz",
+      "depth": 0,
+      "source": "local-tarball",
+      "dependencies": {
+        "com.google.firebase.app": "12.5.0"
+      }
+    },
+    "com.google.firebase.app": {
+      "version": "file:../GooglePackages/com.google.firebase.app-12.5.0.tgz",
+      "depth": 0,
+      "source": "local-tarball",
+      "dependencies": {
+        "com.google.external-dependency-manager": "1.2.183"
+      }
+    },
+    "com.google.firebase.crashlytics": {
+      "version": "file:../GooglePackages/com.google.firebase.crashlytics-12.5.0.tgz",
+      "depth": 0,
+      "source": "local-tarball",
+      "dependencies": {
+        "com.google.firebase.app": "12.5.0"
+      }
+    },
     "com.unity.collab-proxy": {
       "version": "2.5.2",
       "depth": 0,
@@ -55,6 +102,13 @@
     },
     "com.unity.ide.vscode": {
       "version": "1.2.5",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.nuget.newtonsoft-json": {
+      "version": "3.2.1",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
@@ -134,6 +188,15 @@
         "com.unity.modules.jsonserialize": "1.0.0"
       },
       "url": "https://packages.unity.com"
+    },
+    "io.appmetrica.analytics": {
+      "version": "6.3.0",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.google.external-dependency-manager": "1.2.177"
+      },
+      "url": "https://package.openupm.com"
     },
     "com.unity.modules.ai": {
       "version": "1.0.0",

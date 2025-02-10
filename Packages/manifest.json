@@ -1,15 +1,23 @@
 {
   "dependencies": {
+    "com.binouze.googleusermessagingplatform": "https://github.com/binouze/GoogleUserMessagingPlatform.git",
+    "com.gameanalytics.sdk": "7.10.4",
+    "com.google.external-dependency-manager": "1.2.185",
+    "com.google.firebase.analytics": "file:../GooglePackages/com.google.firebase.analytics-12.5.0.tgz",
+    "com.google.firebase.app": "file:../GooglePackages/com.google.firebase.app-12.5.0.tgz",
+    "com.google.firebase.crashlytics": "file:../GooglePackages/com.google.firebase.crashlytics-12.5.0.tgz",
     "com.unity.collab-proxy": "2.5.2",
     "com.unity.feature.development": "1.0.1",
     "com.unity.ide.rider": "3.0.31",
     "com.unity.ide.visualstudio": "2.0.22",
     "com.unity.ide.vscode": "1.2.5",
+    "com.unity.nuget.newtonsoft-json": "3.2.1",
     "com.unity.test-framework": "1.1.33",
     "com.unity.textmeshpro": "3.0.6",
     "com.unity.timeline": "1.6.5",
     "com.unity.ugui": "1.0.0",
     "com.unity.visualscripting": "1.9.4",
+    "io.appmetrica.analytics": "6.3.0",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.androidjni": "1.0.0",
     "com.unity.modules.animation": "1.0.0",
@@ -41,5 +49,16 @@
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
-  }
+  },
+  "scopedRegistries": [
+    {
+      "name": "package.openupm.com",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "io.appmetrica.analytics",
+        "com.google.external-dependency-manager",
+        "com.gameanalytics"
+      ]
+    }
+  ]
 }
