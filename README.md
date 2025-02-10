@@ -1,8 +1,8 @@
 ## Dependencies:
 ### Core
 * [newtonsoft-json](https://docs.unity3d.com/Packages/com.unity.nuget.newtonsoft-json@3.2/manual/index.html)
-### Services
-#### Per service Firebase
+### Per Adapter
+#### Firebase
 * [GoogleExternalDependencyManager](https://github.com/googlesamples/unity-jar-resolver)
 * [GoogleUserMessagingPlatform](https://github.com/binouze/GoogleUserMessagingPlatform)
 * [FirebaseCore](https://firebase.google.com/docs/unity/setup)
