@@ -15,7 +15,7 @@
 
 
 ## Installation
-After adding each adapter from Release section, you need to add it to the _services in AnalyticsManager.cs.
+After adding each adapter from the Release section, you need to add it to the _services in AnalyticsManager.cs.
 Here is an example of how to add FirebaseAnalytics:
 ```csharp
 public class AnalyticsManager : MonoBehaviour
@@ -27,3 +27,4 @@ public class AnalyticsManager : MonoBehaviour
     };
     ...
 ```
+Also, you must attach the script to an empty game object within the first scene.
