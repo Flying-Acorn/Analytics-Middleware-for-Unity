@@ -15,16 +15,17 @@
 
 
 ## Installation
-After adding each adapter from the Release section, you need to add it to the _services in AnalyticsManager.cs.
+After adding each adapter from the Release section, you need to add pass it to the AnalyticsManager in the Initialize method.
 Here is an example of how to add FirebaseAnalytics:
-```csharp
-public class AnalyticsManager : MonoBehaviour
+```csharp 
+// DemoInitCall.cs
+AnalyticsManager.SetDebugMode(true); // Optional, turn off in production
+AnalyticsManager.SaveUserIdentifier(customUserId); // Optional
+AnalyticsManager.Initialize(new List<IAnalytics> // Mandatory
 {
-    ...
-    private List<IAnalytics> _services = new List<IAnalytics>
-    {
-        new FirebaseEvents(),
-    };
-    ...
+    new GameAnalyticsEvents(),
+    new FirebaseEvents(),
+    new AppMetricaEvents("KEY")
+});
 ```
-Also, you must attach the script to an empty game object within the first scene.
+See DemoInitCall scene within Demo folder for more details.
