@@ -6,7 +6,7 @@ using UnityEngine;
 namespace FlyingAcorn.Analytics
 {
     [Serializable]
-    public class AnalyticsManager
+    public class AnalyticsManager : MonoBehaviour
     {
         protected static AnalyticsManager Instance;
 
@@ -14,32 +14,21 @@ namespace FlyingAcorn.Analytics
         protected internal static bool InitCalled;
         private static bool _started;
 
-        private AnalyticsManager(AnalyticServiceProvider analyticServiceProvider)
+        protected virtual void Start()
         {
-            if (_started) return;
-            AnalyticServiceProvider = analyticServiceProvider;
             _started = true;
-            if (AnalyticsPlayerPrefs.SessionCount <= 0)
-            {
-                AnalyticsPlayerPrefs.InstallationVersion = Application.version;
-                // AnalyticsPlayerPrefs.InstallationBuild = GetUserBuildNumber(); TODO: Implement this
-                AnalyticServiceProvider?.DesignEvent("FA_session", "first");
-            }
-
-            AnalyticsPlayerPrefs.SessionCount++;
-            AnalyticServiceProvider?.DesignEvent(AnalyticsPlayerPrefs.SessionCount, "FA_session", "start");
         }
 
-        private void OnApplicationPause(bool pauseStatus)
+        internal void OnApplicationPause(bool pauseStatus)
         {
             if (!_started)
                 return;
-            
+
             var eventName = pauseStatus ? "pause" : "unpause";
             AnalyticServiceProvider?.DesignEvent("FA_session", eventName);
         }
 
-        ~AnalyticsManager()
+        private void OnDestroy()
         {
             if (!_started)
                 return;
@@ -48,7 +37,13 @@ namespace FlyingAcorn.Analytics
 
         public virtual void SetConsents()
         {
-            Debug.Log("SetConsents not implemented");
+            if (AnalyticServiceProvider == null)
+            {
+                MyDebug.LogWarning("Analytics not initialized");
+                return;
+            }
+
+            AnalyticServiceProvider.SetConsents();
         }
 
         public static void SaveUserIdentifier(string playerId)
@@ -81,7 +76,7 @@ namespace FlyingAcorn.Analytics
             Instance.AnalyticServiceProvider.BusinessEvent(currency, amount, itemType, itemId, cartType, storeType,
                 receipt, customData);
         }
-        
+
         public static void DesignEvent(Dictionary<string, object> customFields, params string[] eventSteps)
         {
             if (Instance?.AnalyticServiceProvider == null)
@@ -99,7 +94,7 @@ namespace FlyingAcorn.Analytics
             Instance?.AnalyticServiceProvider?.ErrorEvent(severity, message);
         }
 
-        public static void UserSegmentation(string name, string value, int dimension=-1)
+        public static void UserSegmentation(string name, string value, int dimension = -1)
         {
             if (Instance?.AnalyticServiceProvider == null)
             {
@@ -114,11 +109,33 @@ namespace FlyingAcorn.Analytics
         {
             if (InitCalled)
             {
-                MyDebug.LogWarning("Init already called");
+                MyDebug.LogWarning("Initialize already called");
                 return;
             }
 
-            Instance = new AnalyticsManager(new AnalyticServiceProvider(services));
+            if (!Instance)
+            {
+                Instance = FindObjectOfType<AnalyticsManager>();
+                if (!Instance)
+                {
+                    var go = new GameObject("AnalyticsManager");
+                    Instance = go.AddComponent<AnalyticsManager>();
+                }
+
+                DontDestroyOnLoad(Instance);
+            }
+
+            Instance.AnalyticServiceProvider = new AnalyticServiceProvider(services);
+            if (AnalyticsPlayerPrefs.SessionCount <= 0)
+            {
+                AnalyticsPlayerPrefs.InstallationVersion = Application.version;
+                // AnalyticsPlayerPrefs.InstallationBuild = GetUserBuildNumber(); Implement if you want
+                Instance.AnalyticServiceProvider?.DesignEvent("FA_session", "first");
+            }
+
+            AnalyticsPlayerPrefs.SessionCount++;
+            Instance.AnalyticServiceProvider?.DesignEvent(AnalyticsPlayerPrefs.SessionCount, "FA_session", "start");
+
             Instance.Init();
         }
 
@@ -130,7 +147,7 @@ namespace FlyingAcorn.Analytics
                 MyDebug.LogWarning("Init already called");
                 return;
             }
-            
+
             InitCalled = true;
             AnalyticServiceProvider.Initialize();
         }
@@ -149,6 +166,101 @@ namespace FlyingAcorn.Analytics
         {
             MyDebug.Info($"Debug mode set to {debugMode}");
             AnalyticsPlayerPrefs.UserDebugMode = debugMode;
+        }
+
+        public static void ProgressionEvent(Constants.ProgressionStatus.FlyingAcornProgressionStatus failLevel,
+            string levelType, string levelNumber)
+        {
+            if (Instance?.AnalyticServiceProvider == null)
+            {
+                MyDebug.LogWarning("Analytics not initialized");
+                return;
+            }
+
+            Instance.AnalyticServiceProvider.ProgressionEvent(failLevel, levelType, levelNumber);
+        }
+
+        public static void DesignEvent(string customFields, string levelType, string eventStep, string levelNumber)
+        {
+            if (Instance?.AnalyticServiceProvider == null)
+            {
+                MyDebug.LogWarning("Analytics not initialized");
+                return;
+            }
+
+            Instance.AnalyticServiceProvider.DesignEvent(customFields, levelType, eventStep, levelNumber);
+        }
+
+        public static void ProgressionEvent(Constants.ProgressionStatus.FlyingAcornProgressionStatus completeLevel,
+            string levelType, string levelNumber, int score)
+        {
+            if (Instance?.AnalyticServiceProvider == null)
+            {
+                MyDebug.LogWarning("Analytics not initialized");
+                return;
+            }
+
+            Instance.AnalyticServiceProvider.ProgressionEvent(completeLevel, levelType, levelNumber, score);
+        }
+
+
+        public static void DesignEvent(string customFields, string interactionName)
+        {
+            if (Instance?.AnalyticServiceProvider == null)
+            {
+                MyDebug.LogWarning("Analytics not initialized");
+                return;
+            }
+
+            Instance.AnalyticServiceProvider.DesignEvent(customFields, interactionName);
+        }
+
+
+        public static void DesignEvent(string customFields, string levelType, string dialogName)
+        {
+            if (Instance?.AnalyticServiceProvider == null)
+            {
+                MyDebug.LogWarning("Analytics not initialized");
+                return;
+            }
+
+            Instance.AnalyticServiceProvider.DesignEvent(customFields, levelType, dialogName);
+        }
+
+        public static void DesignEvent(string[] customFields)
+        {
+            if (Instance?.AnalyticServiceProvider == null)
+            {
+                MyDebug.LogWarning("Analytics not initialized");
+                return;
+            }
+
+            Instance.AnalyticServiceProvider.DesignEvent(customFields);
+        }
+
+        public static void DesignEvent(float customFields, string interactionName, string dialogName,
+            string levelNumber, string eventStep)
+        {
+            if (Instance?.AnalyticServiceProvider == null)
+            {
+                MyDebug.LogWarning("Analytics not initialized");
+                return;
+            }
+
+            Instance.AnalyticServiceProvider.DesignEvent(customFields, interactionName, dialogName, levelNumber,
+                eventStep);
+        }
+
+        public static void ResourceEvent(Constants.ResourceFlowType.FlyingAcornResourceFlowType sourceFlow,
+            string itemType, float amount, string reason, string source)
+        {
+            if (Instance?.AnalyticServiceProvider == null)
+            {
+                MyDebug.LogWarning("Analytics not initialized");
+                return;
+            }
+
+            Instance.AnalyticServiceProvider.ResourceEvent(sourceFlow, itemType, amount, reason, source);
         }
     }
 }

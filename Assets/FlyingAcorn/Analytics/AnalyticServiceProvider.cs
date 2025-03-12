@@ -45,7 +45,7 @@ namespace FlyingAcorn.Analytics
 
             IsInitialized = true;
         }
-        
+
         public List<IAnalytics> GetServices()
         {
             return _services;
