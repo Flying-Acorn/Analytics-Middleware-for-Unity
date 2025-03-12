@@ -26,8 +26,13 @@ namespace FlyingAcorn.Analytics.Services
         public string EventSeparator => "_";
         public static readonly UnityEvent OnInitialized = new();
 
+        public FirebaseEvents()
+        {
+        }
+
         public void Initialize()
         {
+            SetUserIdentifier(); // Prevent unreasonable crash
             Crashlytics.IsCrashlyticsCollectionEnabled = true;
             FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task =>
             {
@@ -58,10 +63,9 @@ namespace FlyingAcorn.Analytics.Services
             FirebaseAnalytics.LogEvent(eventName, customData.ToArray());
         }
 
-        public void SetUserIdentifier(string userId)
+        public void SetUserIdentifier()
         {
-            if (string.IsNullOrEmpty(userId))
-                userId = SystemInfo.deviceUniqueIdentifier;
+            var userId = AnalyticsPlayerPrefs.CustomUserId;
             FirebaseAnalytics.SetUserId(userId);
             Crashlytics.SetUserId(userId);
         }

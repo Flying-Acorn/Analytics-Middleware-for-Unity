@@ -6,41 +6,23 @@ using UnityEngine;
 namespace FlyingAcorn.Analytics
 {
     [Serializable]
-    public class AnalyticsManager : MonoBehaviour
+    public class AnalyticsManager
     {
-        [SerializeField] private bool initOnAwake;
         protected static AnalyticsManager Instance;
 
-        private List<IAnalytics> _services = new List<IAnalytics>();
-        
         protected AnalyticServiceProvider AnalyticServiceProvider;
         protected internal static bool InitCalled;
-        private bool _started;
+        private static bool _started;
 
-        protected void Awake()
+        private AnalyticsManager(AnalyticServiceProvider analyticServiceProvider)
         {
-            if (Instance)
-            {
-                Destroy(gameObject);
-                return;
-            }
-
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-            AnalyticServiceProvider = new AnalyticServiceProvider(_services);
-
-            if (initOnAwake)
-                Init();
-        }
-
-        private void Start()
-        {
-            if (Instance._started) return;
-            Instance._started = true;
-            MyDebug.Verbose("AnalyticsManager.Start");
+            if (_started) return;
+            AnalyticServiceProvider = analyticServiceProvider;
+            _started = true;
             if (AnalyticsPlayerPrefs.SessionCount <= 0)
             {
                 AnalyticsPlayerPrefs.InstallationVersion = Application.version;
+                // AnalyticsPlayerPrefs.InstallationBuild = GetUserBuildNumber(); TODO: Implement this
                 AnalyticServiceProvider?.DesignEvent("FA_session", "first");
             }
 
@@ -50,14 +32,14 @@ namespace FlyingAcorn.Analytics
 
         private void OnApplicationPause(bool pauseStatus)
         {
-            if (!Instance._started)
+            if (!_started)
                 return;
             
             var eventName = pauseStatus ? "pause" : "unpause";
             AnalyticServiceProvider?.DesignEvent("FA_session", eventName);
         }
 
-        private void OnDestroy()
+        ~AnalyticsManager()
         {
             if (!_started)
                 return;
@@ -69,14 +51,15 @@ namespace FlyingAcorn.Analytics
             Debug.Log("SetConsents not implemented");
         }
 
-        public virtual void SetUserIdentifier(string playerId)
+        public static void SaveUserIdentifier(string playerId)
         {
-            Debug.Log("SetUserIdentifier not implemented");
+            MyDebug.Info($"Saving user identifier: {playerId}");
+            AnalyticsPlayerPrefs.CustomUserId = playerId;
         }
 
-        public static void SetAnalyticsConsents()
+        protected static void SetAnalyticsConsents()
         {
-            if (!Instance || Instance.AnalyticServiceProvider == null)
+            if (Instance?.AnalyticServiceProvider == null)
             {
                 MyDebug.LogWarning("Analytics not initialized");
                 return;
@@ -89,7 +72,7 @@ namespace FlyingAcorn.Analytics
             string cartType,
             StoreType storeType, string receipt, Dictionary<string, object> customData)
         {
-            if (!Instance || Instance.AnalyticServiceProvider == null)
+            if (Instance?.AnalyticServiceProvider == null)
             {
                 MyDebug.LogWarning("Analytics not initialized");
                 return;
@@ -98,22 +81,27 @@ namespace FlyingAcorn.Analytics
             Instance.AnalyticServiceProvider.BusinessEvent(currency, amount, itemType, itemId, cartType, storeType,
                 receipt, customData);
         }
+        
+        public static void DesignEvent(Dictionary<string, object> customFields, params string[] eventSteps)
+        {
+            if (Instance?.AnalyticServiceProvider == null)
+            {
+                MyDebug.LogWarning("Analytics not initialized");
+                return;
+            }
+
+            Instance.AnalyticServiceProvider.DesignEvent(customFields, eventSteps);
+        }
 
         // ATTENTION: DO NOT USE MYDEBUG HERE
         public static void ErrorEvent(Constants.ErrorSeverity.FlyingAcornErrorSeverity severity, string message)
         {
-            if (!Instance || Instance.AnalyticServiceProvider == null)
-            {
-                Debug.Log("Analytics not initialized");
-                return;
-            }
-
-            Instance.AnalyticServiceProvider.ErrorEvent(severity, message);
+            Instance?.AnalyticServiceProvider?.ErrorEvent(severity, message);
         }
 
-        public static void UserSegmentation(string name, string value, int dimension)
+        public static void UserSegmentation(string name, string value, int dimension=-1)
         {
-            if (!Instance || Instance.AnalyticServiceProvider == null)
+            if (Instance?.AnalyticServiceProvider == null)
             {
                 MyDebug.LogWarning("Analytics not initialized");
                 return;
@@ -122,44 +110,45 @@ namespace FlyingAcorn.Analytics
             Instance.AnalyticServiceProvider.UserSegmentation(name, value, dimension);
         }
 
-        public static void Initialize()
+        public static void Initialize(List<IAnalytics> services)
         {
-            if (!Instance)
-            {
-                MyDebug.LogWarning("Instance is null");
-                return;
-            }
-
-            Instance.Init();
-        }
-
-        // ReSharper disable once MemberCanBePrivate.Global
-        public virtual void Init()
-        {
-            MyDebug.Verbose("Initializing Analytics");
             if (InitCalled)
             {
                 MyDebug.LogWarning("Init already called");
                 return;
             }
 
+            Instance = new AnalyticsManager(new AnalyticServiceProvider(services));
+            Instance.Init();
+        }
+
+        // ReSharper disable once MemberCanBePrivate.Global
+        protected virtual void Init()
+        {
+            if (InitCalled)
+            {
+                MyDebug.LogWarning("Init already called");
+                return;
+            }
+            
             InitCalled = true;
             AnalyticServiceProvider.Initialize();
         }
 
         public static IAnalytics GetRunningService([NotNull] Type type)
         {
-            if (!Instance || Instance.AnalyticServiceProvider == null)
-            {
-                return null;
-            }
-
-            return Instance._services.Find(s => s.GetType() == type);
+            return Instance?.AnalyticServiceProvider?.GetServices().Find(s => s.GetType() == type);
         }
 
         public IAnalytics GetService([NotNull] Type type)
         {
-            return _services.Find(s => s.GetType() == type);
+            return Instance.AnalyticServiceProvider.GetServices().Find(s => s.GetType() == type);
+        }
+
+        public static void SetDebugMode(bool debugMode)
+        {
+            MyDebug.Info($"Debug mode set to {debugMode}");
+            AnalyticsPlayerPrefs.UserDebugMode = debugMode;
         }
     }
 }

@@ -18,8 +18,13 @@ namespace FlyingAcorn.Analytics.Services
         public int EventStepLengthLimit => 32;
         public string EventSeparator => ":";
 
+        public GameAnalyticsEvents()
+        {
+        }
+
         public void Initialize()
         {
+            SetUserIdentifier();
             GameAnalytics.Initialize();
             IsInitialized = true;
         }
@@ -77,15 +82,16 @@ namespace FlyingAcorn.Analytics.Services
                             ":: undefined argument   </color>");
         }
 
-        public void SetUserIdentifier(string userId)
+        public void SetUserIdentifier()
         {
             if (!IsInitialized) return;
-            GameAnalytics.SetCustomId(userId);
+            GameAnalytics.SetCustomId(AnalyticsPlayerPrefs.CustomUserId);
         }
 
         public void SetConsents()
         {
             if (!IsInitialized) return;
+            // GameAnalytics.SetEnabledEventSubmission(IsGDPRConsentGranted()); TODO: implement this
         }
 
         public void BusinessEvent(string currency, decimal amount, string itemType, string itemId, string cartType,

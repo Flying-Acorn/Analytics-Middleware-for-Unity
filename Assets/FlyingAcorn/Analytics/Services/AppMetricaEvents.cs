@@ -11,11 +11,11 @@ namespace FlyingAcorn.Analytics.Services
     [UsedImplicitly]
     public class AppMetricaEvents : IAnalytics
     {
-        public string AppKey;
-
+        private readonly string _appKey;
+        
         public AppMetricaEvents(string appKey)
         {
-            AppKey = appKey;
+            _appKey = appKey;
         }
 
         private static bool IsFirstLaunch()
@@ -30,8 +30,9 @@ namespace FlyingAcorn.Analytics.Services
 
         public void Initialize()
         {
+            SetUserIdentifier();
             AppMetrica.OnActivation += _ => IsInitialized = true;
-            AppMetrica.Activate(new AppMetricaConfig(AppKey)
+            AppMetrica.Activate(new AppMetricaConfig(_appKey)
             {
                 FirstActivationAsUpdate = !IsFirstLaunch(),
             });
@@ -42,7 +43,7 @@ namespace FlyingAcorn.Analytics.Services
         public void ErrorEvent(Constants.ErrorSeverity.FlyingAcornErrorSeverity severity, string message)
         {
             if (!IsInitialized) return;
-            if (severity < Constants.ErrorSeverity.FlyingAcornErrorSeverity.ErrorSeverity)
+            if (severity < Constants.ErrorSeverity.FlyingAcornErrorSeverity.WarningSeverity)
             {
                 return;
             }
@@ -72,10 +73,10 @@ namespace FlyingAcorn.Analytics.Services
             AppMetrica.ReportEvent(flowType.ToString(), info);
         }
 
-        public void SetUserIdentifier(string userId)
+        public void SetUserIdentifier()
         {
             if (!IsInitialized) return;
-            AppMetrica.SetUserProfileID(userId);
+            AppMetrica.SetUserProfileID(AnalyticsPlayerPrefs.CustomUserId);
         }
 
         public void SetConsents()
