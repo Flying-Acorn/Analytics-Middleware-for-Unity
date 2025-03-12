@@ -1,8 +1,6 @@
 using System.Collections.Generic;
-using FlyingAcorn.Analytics.Services;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace FlyingAcorn.Analytics.Demo
 {
@@ -20,9 +18,9 @@ namespace FlyingAcorn.Analytics.Demo
             AnalyticsManager.SaveUserIdentifier(customUserId);
             AnalyticsManager.Initialize(new List<IAnalytics>
             {
-                new GameAnalyticsEvents(),
-                new FirebaseEvents(),
-                new AppMetricaEvents(appMetricaKey)
+                new Services.GameAnalyticsEvents(),
+                new Services.FirebaseEvents(),
+                new Services.AppMetricaEvents(appMetricaKey)
             });
             AnalyticsManager.ErrorEvent(Constants.ErrorSeverity.FlyingAcornErrorSeverity.InfoSeverity, "This is a test error message");
         }
