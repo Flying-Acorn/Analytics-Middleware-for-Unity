@@ -14,6 +14,13 @@ namespace FlyingAcorn.Analytics
         protected internal static bool InitCalled;
         private static bool _started;
 
+
+        protected virtual void Awake()
+        {
+            if (!Instance) return;
+            Destroy(this);
+        }
+
         protected virtual void Start()
         {
             _started = true;
