@@ -157,6 +157,7 @@ namespace FlyingAcorn.Analytics
 
             InitCalled = true;
             AnalyticServiceProvider.Initialize();
+            // UserSegmentation("Store", DataUtils.GetStore().ToString(), 1); // Uncomment to segment your users by store
         }
 
         public static IAnalytics GetRunningService([NotNull] Type type)
