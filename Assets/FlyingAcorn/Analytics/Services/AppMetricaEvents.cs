@@ -12,7 +12,7 @@ namespace FlyingAcorn.Analytics.Services
     public class AppMetricaEvents : IAnalytics
     {
         private readonly string _appKey;
-        
+
         public AppMetricaEvents(string appKey)
         {
             _appKey = appKey;
@@ -22,21 +22,37 @@ namespace FlyingAcorn.Analytics.Services
         {
             return PlayerPrefs.GetInt("MetricaIsFirstLaunch", 0) == 0;
         }
-        
+
+        public static string CustomTrackingId
+        {
+            get => PlayerPrefs.GetString("MetricaCustomTrackingId", string.Empty);
+            set => PlayerPrefs.SetString("MetricaCustomTrackingId", value);
+        }
+
         public int EventLengthLimit => -1;
         public int EventStepLengthLimit => -1;
         public bool IsInitialized { get; private set; }
         public string EventSeparator => "_";
 
+
         public void Initialize()
         {
             SetUserIdentifier();
-            AppMetrica.OnActivation += _ => IsInitialized = true;
-            AppMetrica.Activate(new AppMetricaConfig(_appKey)
+            AppMetrica.OnActivation -= OnInitialized;
+            AppMetrica.OnActivation += OnInitialized;
+            var config = new AppMetricaConfig(_appKey)
             {
                 FirstActivationAsUpdate = !IsFirstLaunch(),
-            });
+            };
+            AppMetrica.Activate(config);
             PlayerPrefs.SetInt("MetricaIsFirstLaunch", 1);
+        }
+
+        private void OnInitialized(AppMetricaConfig config)
+        {
+            IsInitialized = true;
+            if (!string.IsNullOrEmpty(CustomTrackingId))
+                UserSegmentation("InstallTrackingId", CustomTrackingId);
         }
 
         // ATTENTION: DO NOT USE MYDEBUG HERE

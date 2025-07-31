@@ -18,9 +18,9 @@ namespace FlyingAcorn.Analytics.Demo
             AnalyticsManager.SaveUserIdentifier(customUserId);
             AnalyticsManager.Initialize(new List<IAnalytics>
             {
-                new Services.GameAnalyticsEvents(),
-                new Services.FirebaseEvents(),
-                new Services.AppMetricaEvents(appMetricaKey)
+                new Services.GameAnalyticsEvents(), // Uncomment this line if you want to use GameAnalytics
+                new Services.FirebaseEvents(), // Uncomment this line if you want to use Firebase
+                new Services.AppMetricaEvents(appMetricaKey) // Uncomment this line if you want to use AppMetrica
             });
             AnalyticsManager.ErrorEvent(Constants.ErrorSeverity.FlyingAcornErrorSeverity.InfoSeverity, "This is a test error message");
         }
