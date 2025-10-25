@@ -23,12 +23,6 @@ namespace FlyingAcorn.Analytics.Services
             return PlayerPrefs.GetInt("MetricaIsFirstLaunch", 0) == 0;
         }
 
-        public static string CustomTrackingId
-        {
-            get => PlayerPrefs.GetString("MetricaCustomTrackingId", string.Empty);
-            set => PlayerPrefs.SetString("MetricaCustomTrackingId", value);
-        }
-
         public int EventLengthLimit => -1;
         public int EventStepLengthLimit => -1;
         public bool IsInitialized { get; private set; }
@@ -37,7 +31,6 @@ namespace FlyingAcorn.Analytics.Services
 
         public void Initialize()
         {
-            SetUserIdentifier();
             AppMetrica.OnActivation -= OnInitialized;
             AppMetrica.OnActivation += OnInitialized;
             var config = new AppMetricaConfig(_appKey)
@@ -51,8 +44,7 @@ namespace FlyingAcorn.Analytics.Services
         private void OnInitialized(AppMetricaConfig config)
         {
             IsInitialized = true;
-            if (!string.IsNullOrEmpty(CustomTrackingId))
-                UserSegmentation("InstallTrackingId", CustomTrackingId);
+            SetUserIdentifier();
         }
 
         // ATTENTION: DO NOT USE MYDEBUG HERE
@@ -64,7 +56,14 @@ namespace FlyingAcorn.Analytics.Services
                 return;
             }
 
-            AppMetrica.ReportError(message);
+            try
+            {
+                AppMetrica.ReportError(message);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"Failed to report AppMetrica error: {ex.Message}");
+            }
         }
 
         public void UserSegmentation(string name, string property, int dimension = -1)
@@ -91,7 +90,6 @@ namespace FlyingAcorn.Analytics.Services
 
         public void SetUserIdentifier()
         {
-            if (!IsInitialized) return;
             AppMetrica.SetUserProfileID(AnalyticsPlayerPrefs.CustomUserId);
         }
 
@@ -112,6 +110,14 @@ namespace FlyingAcorn.Analytics.Services
             StoreType storeType, string receipt, Dictionary<string, object> customData)
         {
             if (!IsInitialized) return;
+
+            // Validate required parameters
+            if (string.IsNullOrEmpty(currency) || string.IsNullOrEmpty(itemId) || amount <= 0)
+            {
+                MyDebug.LogWarning("BusinessEvent: Invalid parameters - currency and itemId cannot be null/empty, amount must be > 0");
+                return;
+            }
+
             if (AppMetrica.ActivationConfig != null && AppMetrica.ActivationConfig.RevenueAutoTrackingEnabled != null)
             {
                 if (AppMetrica.ActivationConfig.RevenueAutoTrackingEnabled.Value)
@@ -125,18 +131,44 @@ namespace FlyingAcorn.Analytics.Services
                 }
             }
 
-            // 990000 (equivalent to 0.99 in real currency)
-            var priceMicros = (long)(amount * 1000000);
-            MyDebug.Verbose($"Sending business event to analytics: {currency} " +
-                            $"with priceMicros: {priceMicros} with itemType: {itemType}");
-            var yandexAppMetricaRevenue = new Revenue(priceMicros, currency);
-            AppMetrica.ReportRevenue(yandexAppMetricaRevenue);
+            // Safe conversion to micros with overflow protection
+            decimal microsDecimal = amount * 1000000m;
+            if (microsDecimal > long.MaxValue || microsDecimal < long.MinValue)
+            {
+                MyDebug.LogWarning($"BusinessEvent: Amount {amount} would cause overflow in micros conversion");
+                return;
+            }
+
+            var priceMicros = (long)microsDecimal;
+
+            if (AnalyticsPlayerPrefs.UserDebugMode)
+            {
+                MyDebug.Info($"[AppMetrica] Sending BusinessEvent - Currency: {currency}, Amount: {amount} ({priceMicros} micros), ItemType: {itemType}, ItemId: {itemId}, CartType: {cartType}, StoreType: {storeType}, Receipt: {receipt ?? "null"}");
+                return;
+            }
+
+            try
+            {
+                var yandexAppMetricaRevenue = new Revenue(priceMicros, currency);
+                AppMetrica.ReportRevenue(yandexAppMetricaRevenue);
+            }
+            catch (System.Exception ex)
+            {
+                MyDebug.LogWarning($"Failed to report AppMetrica revenue: {ex.Message}");
+            }
         }
 
         public void DesignEvent(params string[] eventSteps)
         {
             if (!IsInitialized) return;
-            AppMetrica.ReportEvent(this.GetEventName(eventSteps));
+            try
+            {
+                AppMetrica.ReportEvent(this.GetEventName(eventSteps));
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"Failed to report AppMetrica design event: {ex.Message}");
+            }
         }
 
         public void DesignEvent(Dictionary<string, object> customFields, params string[] eventSteps)
@@ -162,28 +194,71 @@ namespace FlyingAcorn.Analytics.Services
         public void ProgressionEvent(Constants.ProgressionStatus.FlyingAcornProgressionStatus progressionStatus,
             string levelType, string levelNumber)
         {
-            if (!IsInitialized) return;
-            AppMetrica.ReportEvent($"{levelType}_{progressionStatus}_{levelNumber}");
+            ProgressionEventInternal(progressionStatus, levelType, levelNumber, null, null);
         }
 
         public void ProgressionEvent(Constants.ProgressionStatus.FlyingAcornProgressionStatus progressionStatus,
             string levelType, string levelNumber, int score)
         {
-            if (!IsInitialized) return;
-            var finalCustomFields = new Dictionary<string, object> { { "score", score } };
-            AppMetrica.ReportEvent($"{levelType}_{progressionStatus}_{levelNumber}",
-                JsonConvert.SerializeObject(finalCustomFields));
+            ProgressionEventInternal(progressionStatus, levelType, levelNumber, score, null);
         }
 
         public void ProgressionEvent(Constants.ProgressionStatus.FlyingAcornProgressionStatus progressionStatus,
             string levelType, string levelNumber, int score,
             Dictionary<string, object> customFields)
         {
-            if (!IsInitialized) return;
-            var finalCustomFields = new Dictionary<string, object>(customFields) { { "score", score } };
-            AppMetrica.ReportEvent($"{levelType}_{progressionStatus}_{levelNumber}",
-                JsonConvert.SerializeObject(finalCustomFields));
+            ProgressionEventInternal(progressionStatus, levelType, levelNumber, score, customFields);
         }
+
+        private void ProgressionEventInternal(Constants.ProgressionStatus.FlyingAcornProgressionStatus progressionStatus,
+            string levelType, string levelNumber, int? score, Dictionary<string, object> customFields)
+        {
+            if (!IsInitialized) return;
+
+            var data = new Dictionary<string, object>
+            {
+                { "levelType", levelType },
+                { "levelNumber", levelNumber },
+                { "status", progressionStatus.ToString() }
+            };
+
+            // Add score if provided
+            if (score.HasValue)
+            {
+                data["score"] = score.Value;
+            }
+
+            // Add custom fields if provided
+            if (customFields != null)
+            {
+                foreach (var kvp in customFields)
+                {
+                    data[kvp.Key] = kvp.Value;
+                }
+            }
+
+            var eventName = progressionStatus switch
+            {
+                Constants.ProgressionStatus.FlyingAcornProgressionStatus.StartLevel => "FA_level_start",
+                Constants.ProgressionStatus.FlyingAcornProgressionStatus.CompleteLevel => "FA_level_complete",
+                Constants.ProgressionStatus.FlyingAcornProgressionStatus.FailLevel => "FA_level_fail",
+                _ => throw new System.ArgumentOutOfRangeException(nameof(progressionStatus), progressionStatus, null)
+            };
+
+            DesignEvent(data, eventName);
+        }
+
+
+        public void SignUpEvent(string method, Dictionary<string, object> extraFields = null)
+        {
+            if (!IsInitialized) return;
+
+            var eventName = "FA_sign_up";
+            extraFields ??= new Dictionary<string, object>();
+            extraFields["method"] = method;
+            DesignEvent(extraFields, eventName);
+        }
+
 
         public void NonLevelProgressionEvent(Constants.ProgressionStatus.FlyingAcornNonLevelStatus progressionStatus,
             string progressionType)

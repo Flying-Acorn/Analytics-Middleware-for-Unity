@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using GameAnalyticsSDK;
 using JetBrains.Annotations;
@@ -91,7 +92,7 @@ namespace FlyingAcorn.Analytics.Services
         public void SetConsents()
         {
             if (!IsInitialized) return;
-            // GameAnalytics.SetEnabledEventSubmission(IsGDPRConsentGranted()); TODO: implement this
+            GameAnalytics.SetEnabledEventSubmission(AnalyticsPlayerPrefs.GDPRConsent);
         }
 
         public void BusinessEvent(string currency, decimal amount, string itemType, string itemId, string cartType,
@@ -105,28 +106,36 @@ namespace FlyingAcorn.Analytics.Services
             StoreType storeType, string receipt, Dictionary<string, object> customData)
         {
             if (!IsInitialized) return;
-            var GAAmount = decimal.ToInt32(amount * 100);
-            MyDebug.Verbose($"Sending business event to analytics: {currency} " +
-                            $"with amount: {GAAmount} with itemType: {itemType} " +
-                            $"with itemID: {itemId} with cartType: {cartType} " +
-                            $"with receipt: {receipt} for these services: GameAnalytics");
+
+            // Validate required parameters
+            if (string.IsNullOrEmpty(currency) || string.IsNullOrEmpty(itemId) || amount <= 0)
+            {
+                MyDebug.LogWarning("BusinessEvent: Invalid parameters - currency and itemId cannot be null/empty, amount must be > 0");
+                return;
+            }
+
+            // Use decimal rounding for more accurate conversion to cents
+            var GAAmount = decimal.ToInt32(Math.Round(amount * 100));
+
+            if (AnalyticsPlayerPrefs.UserDebugMode)
+            {
+                MyDebug.Info($"[GameAnalytics] Sending BusinessEvent - Currency: {currency}, Amount: {amount} ({GAAmount} cents), ItemType: {itemType}, ItemId: {itemId}, CartType: {cartType}, StoreType: {storeType}, Receipt: {receipt ?? "null"}");
+                return;
+            }
 
             if (storeType is StoreType.AppStore or StoreType.GooglePlay)
             {
-#if (UNITY_ANDROID)
-                GameAnalytics.NewBusinessEventGooglePlay(currency, GAAmount, itemType, itemId, cartType, receipt, null,
-                    customData);
+#if UNITY_ANDROID
+                GameAnalytics.NewBusinessEventGooglePlay(currency, GAAmount, itemType, itemId, cartType, receipt, null);
 #endif
-#if (UNITY_IOS)
-                if (string.IsNullOrEmpty(receipt))
+#if UNITY_IOS
+                if (!string.IsNullOrEmpty(receipt))
                 {
-                    GameAnalytics.NewBusinessEventIOS(currency, GAAmount, itemType, itemId, cartType, receipt,
-                        customData);
+                    GameAnalytics.NewBusinessEventIOS(currency, GAAmount, itemType, itemId, cartType, receipt);
                 }
                 else
                 {
-                    GameAnalytics.NewBusinessEventIOSAutoFetchReceipt(currency, GAAmount, itemType, itemId, cartType,
-                        customData);
+                    GameAnalytics.NewBusinessEventIOSAutoFetchReceipt(currency, GAAmount, itemType, itemId, cartType);
                 }
 #endif
             }
@@ -189,6 +198,14 @@ namespace FlyingAcorn.Analytics.Services
             if (!IsInitialized) return;
             var status = ConvertGameAnalyticsTypes.ConvertorNoneLevelProgression(progressionStatus);
             GameAnalytics.NewProgressionEvent(status, progressionType);
+        }
+
+        public void SignUpEvent(string method, Dictionary<string, object> extraFields = null)
+        {
+            if (!IsInitialized) return;
+            extraFields ??= new Dictionary<string, object>();
+            extraFields["method"] = method;
+            GameAnalytics.NewDesignEvent("fa_sign_up", extraFields);
         }
 
         #endregion

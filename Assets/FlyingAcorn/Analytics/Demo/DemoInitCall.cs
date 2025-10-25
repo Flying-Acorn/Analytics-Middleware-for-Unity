@@ -16,6 +16,10 @@ namespace FlyingAcorn.Analytics.Demo
             Application.logMessageReceived += LogCallback;
             AnalyticsManager.SetDebugMode(debugMode);
             AnalyticsManager.SaveUserIdentifier(customUserId);
+            AnalyticsManager.SetGDPRConsent(true);
+
+            // Example build number, use this: https://discussions.unity.com/t/get-build-number-from-a-script/735000/27 or ignore. An upcoming feature will automate this.
+            AnalyticsManager.SetBuildNumber("12");
             AnalyticsManager.Initialize(new List<IAnalytics>
             {
                 new Services.GameAnalyticsEvents(), // Uncomment this line if you want to use GameAnalytics
