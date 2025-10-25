@@ -199,11 +199,11 @@
       "url": "https://packages.unity.com"
     },
     "io.appmetrica.analytics": {
-      "version": "6.3.0",
+      "version": "6.5.2",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.google.external-dependency-manager": "1.2.177"
+        "com.google.external-dependency-manager": "1.2.183"
       },
       "url": "https://package.openupm.com"
     },
