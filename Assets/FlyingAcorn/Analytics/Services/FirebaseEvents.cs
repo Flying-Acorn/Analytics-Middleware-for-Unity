@@ -10,6 +10,7 @@ using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Events;
 using FirebaseAnalytics = Firebase.Analytics.FirebaseAnalytics;
+using static FlyingAcorn.Analytics.BuildData.Constants;
 using static FlyingAcorn.Analytics.Constants.ErrorSeverity;
 using static FlyingAcorn.Analytics.Constants.ProgressionStatus;
 using static FlyingAcorn.Analytics.Constants.ResourceFlowType;
@@ -133,18 +134,18 @@ namespace FlyingAcorn.Analytics.Services
         }
 
         public void BusinessEvent(string currency, decimal amount, string itemType, string itemId, string cartType,
-            StoreType storeType, string receipt = null)
+            Store Store, string receipt = null)
         {
             if (!IsInitialized) return;
-            BusinessEvent(currency, amount, itemType, itemId, cartType, storeType, receipt,
+            BusinessEvent(currency, amount, itemType, itemId, cartType, Store, receipt,
                 new Dictionary<string, object>());
         }
 
         public void BusinessEvent(string currency, decimal amount, string itemType, string itemId, string cartType,
-            StoreType storeType, string receipt, Dictionary<string, object> customData)
+            Store Store, string receipt, Dictionary<string, object> customData)
         {
             if (!IsInitialized) return;
-            if (storeType is StoreType.GooglePlay or StoreType.AppStore)
+            if (Store is Store.GooglePlay or Store.AppStore)
             {
                 MyDebug.Info("Ignoring manual purchase event for Google Play or App Store for Firebase");
                 return;

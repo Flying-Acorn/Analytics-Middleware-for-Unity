@@ -5,6 +5,7 @@ using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
 using Attribute = Io.AppMetrica.Profile.Attribute;
+using static FlyingAcorn.Analytics.BuildData.Constants;
 
 namespace FlyingAcorn.Analytics.Services
 {
@@ -100,14 +101,14 @@ namespace FlyingAcorn.Analytics.Services
         }
 
         public void BusinessEvent(string currency, decimal amount, string itemType, string itemId, string cartType,
-            StoreType storeType, string receipt = null)
+            Store Store, string receipt = null)
         {
             if (!IsInitialized) return;
-            BusinessEvent(currency, amount, itemType, itemId, cartType, storeType, receipt, null);
+            BusinessEvent(currency, amount, itemType, itemId, cartType, Store, receipt, null);
         }
 
         public void BusinessEvent(string currency, decimal amount, string itemType, string itemId, string cartType,
-            StoreType storeType, string receipt, Dictionary<string, object> customData)
+            Store Store, string receipt, Dictionary<string, object> customData)
         {
             if (!IsInitialized) return;
 
@@ -122,7 +123,7 @@ namespace FlyingAcorn.Analytics.Services
             {
                 if (AppMetrica.ActivationConfig.RevenueAutoTrackingEnabled.Value)
                 {
-                    if (storeType is StoreType.AppStore or StoreType.GooglePlay)
+                    if (Store is Store.AppStore or Store.GooglePlay)
                     {
                         MyDebug.Info(
                             "AppMetrica revenue auto tracking is enabled, skipping manual revenue tracking");
@@ -143,7 +144,7 @@ namespace FlyingAcorn.Analytics.Services
 
             if (AnalyticsPlayerPrefs.UserDebugMode)
             {
-                MyDebug.Info($"[AppMetrica] Sending BusinessEvent - Currency: {currency}, Amount: {amount} ({priceMicros} micros), ItemType: {itemType}, ItemId: {itemId}, CartType: {cartType}, StoreType: {storeType}, Receipt: {receipt ?? "null"}");
+                MyDebug.Info($"[AppMetrica] Sending BusinessEvent - Currency: {currency}, Amount: {amount} ({priceMicros} micros), ItemType: {itemType}, ItemId: {itemId}, CartType: {cartType}, Store: {Store}, Receipt: {receipt ?? "null"}");
                 return;
             }
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using GameAnalyticsSDK;
 using JetBrains.Annotations;
+using static FlyingAcorn.Analytics.BuildData.Constants;
 using static FlyingAcorn.Analytics.Constants.ProgressionStatus;
 using static FlyingAcorn.Analytics.Constants.ResourceFlowType;
 using static FlyingAcorn.Analytics.Constants.ErrorSeverity;
@@ -96,14 +97,14 @@ namespace FlyingAcorn.Analytics.Services
         }
 
         public void BusinessEvent(string currency, decimal amount, string itemType, string itemId, string cartType,
-            StoreType storeType, string receipt = null)
+            Store Store, string receipt = null)
         {
-            BusinessEvent(currency, amount, itemType, itemId, cartType, storeType, receipt,
+            BusinessEvent(currency, amount, itemType, itemId, cartType, Store, receipt,
                 new Dictionary<string, object>());
         }
 
         public void BusinessEvent(string currency, decimal amount, string itemType, string itemId, string cartType,
-            StoreType storeType, string receipt, Dictionary<string, object> customData)
+            Store Store, string receipt, Dictionary<string, object> customData)
         {
             if (!IsInitialized) return;
 
@@ -119,11 +120,11 @@ namespace FlyingAcorn.Analytics.Services
 
             if (AnalyticsPlayerPrefs.UserDebugMode)
             {
-                MyDebug.Info($"[GameAnalytics] Sending BusinessEvent - Currency: {currency}, Amount: {amount} ({GAAmount} cents), ItemType: {itemType}, ItemId: {itemId}, CartType: {cartType}, StoreType: {storeType}, Receipt: {receipt ?? "null"}");
+                MyDebug.Info($"[GameAnalytics] Sending BusinessEvent - Currency: {currency}, Amount: {amount} ({GAAmount} cents), ItemType: {itemType}, ItemId: {itemId}, CartType: {cartType}, Store: {Store}, Receipt: {receipt ?? "null"}");
                 return;
             }
 
-            if (storeType is StoreType.AppStore or StoreType.GooglePlay)
+            if (Store is Store.AppStore or Store.GooglePlay)
             {
 #if UNITY_ANDROID
                 GameAnalytics.NewBusinessEventGooglePlay(currency, GAAmount, itemType, itemId, cartType, receipt, null);

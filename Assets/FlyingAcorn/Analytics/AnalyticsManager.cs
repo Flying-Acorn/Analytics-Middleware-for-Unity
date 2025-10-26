@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using FlyingAcorn.Analytics.BuildData;
 using JetBrains.Annotations;
 using UnityEngine;
+using static FlyingAcorn.Analytics.BuildData.Constants;
 
 namespace FlyingAcorn.Analytics
 {
@@ -54,7 +56,6 @@ namespace FlyingAcorn.Analytics
             AnalyticServiceProvider.SetConsents();
         }
 
-
         // Call this before Initialization
         public static void SaveUserIdentifier(string playerId)
         {
@@ -68,10 +69,18 @@ namespace FlyingAcorn.Analytics
             AnalyticsPlayerPrefs.GDPRConsent = consent;
         }
 
-        // Call this before Initialization
-        public static void SetBuildNumber(string buildNumber)
+        /// <summary>
+        /// Sets the store for analytics tracking.
+        /// </summary>
+        /// <param name="store">The store enum value (e.g., GooglePlay, AppStore).</param>
+        /// <remarks>
+        /// Call this method before AnalyticsManager.Initialize() if build enforcement is disabled.
+        /// It is recommended to set the store via Build Settings instead for automatic enforcement.
+        /// Do not call multiple times; set once at startup.
+        /// </remarks>
+        public static void SetStore(Analytics.BuildData.Constants.Store store)
         {
-            AnalyticsPlayerPrefs.RecordedBuildNumber = buildNumber;
+            AnalyticsPlayerPrefs.Store = store;
         }
 
         protected static void SetAnalyticsConsents()
@@ -87,14 +96,14 @@ namespace FlyingAcorn.Analytics
 
         public static void BusinessEvent(string currency, decimal amount, string itemType, string itemId,
             string cartType,
-            StoreType storeType, string receipt, Dictionary<string, object> customData)
+            Store Store, string receipt, Dictionary<string, object> customData)
         {
             if (!IsReady)
             {
                 MyDebug.LogWarning("Analytics not initialized");
                 return;
             }
-            Instance.AnalyticServiceProvider.BusinessEvent(currency, amount, itemType, itemId, cartType, storeType,
+            Instance.AnalyticServiceProvider.BusinessEvent(currency, amount, itemType, itemId, cartType, Store,
                 receipt, customData);
         }
 
@@ -150,7 +159,7 @@ namespace FlyingAcorn.Analytics
             if (AnalyticsPlayerPrefs.SessionCount <= 0)
             {
                 AnalyticsPlayerPrefs.InstallationVersion = Application.version;
-                AnalyticsPlayerPrefs.InstallationBuild = AnalyticsPlayerPrefs.RecordedBuildNumber;
+                AnalyticsPlayerPrefs.InstallationBuild = BuildDataUtils.GetUserBuildNumber();
                 Instance.AnalyticServiceProvider?.DesignEvent("FA_session", "first");
             }
 
