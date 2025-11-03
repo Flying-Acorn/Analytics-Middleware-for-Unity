@@ -1,31 +1,50 @@
-## Dependencies:
+# Flying Acorn Analytics Middleware
+
+A unified analytics middleware for Unity supporting Firebase, AppMetrica, and GameAnalytics with GDPR compliance and cross-platform support.
+## Dependencies
+
 ### Core
 * [newtonsoft-json](https://docs.unity3d.com/Packages/com.unity.nuget.newtonsoft-json@3.2/manual/index.html)
 ### Per Adapter
 #### Firebase
-* [GoogleExternalDependencyManager](https://github.com/googlesamples/unity-jar-resolver)
-* [GoogleUserMessagingPlatform](https://github.com/binouze/GoogleUserMessagingPlatform)
-* [FirebaseCore](https://firebase.google.com/docs/unity/setup)
-* [FirebaseAnalytics](https://firebase.google.com/docs/unity/setup)
-* [FirebaseCrashlytics](https://firebase.google.com/docs/unity/setup)
+* [Google External Dependency Manager](https://github.com/googlesamples/unity-jar-resolver)
+* [Google User Messaging Platform](https://github.com/binouze/GoogleUserMessagingPlatform)
+* [Firebase Core](https://firebase.google.com/docs/unity/setup)
+* [Firebase Analytics](https://firebase.google.com/docs/unity/setup)
+* [Firebase Crashlytics](https://firebase.google.com/docs/unity/setup)
+
 #### AppMetrica
 * [Yandex AppMetrica](https://appmetrica.yandex.com/docs/en/sdk/unity/analytics/quick-start)
+
 #### GameAnalytics
 * [GameAnalytics](https://docs.gameanalytics.com/integrations/sdk/unity/)
 
+## Usage
 
-## Installation
-After adding each adapter from the Release section, you need to add pass it to the AnalyticsManager in the Initialize method.
-Here is an example of how to add FirebaseAnalytics:
-```csharp 
-// DemoInitCall.cs
-AnalyticsManager.SetDebugMode(true); // Optional, turn off in production
-AnalyticsManager.SaveUserIdentifier(customUserId); // Optional
-AnalyticsManager.Initialize(new List<IAnalytics> // Mandatory
+After installing the package and adding your chosen analytics SDKs, initialize the middleware in your code:
+
+```csharp
+using FlyingAcorn.Analytics;
+using System.Collections.Generic;
+
+// Optional: Enable debug mode (disable in production)
+AnalyticsManager.SetDebugMode(true);
+
+// Optional: Set user identifier
+AnalyticsManager.SaveUserIdentifier("custom_user_id");
+
+// Optional: Set GDPR consent
+AnalyticsManager.SetGDPRConsent(true);
+
+// Optional: Set target store
+AnalyticsManager.SetStore(BuildData.Constants.Store.GooglePlay);
+
+// Initialize with your chosen analytics services
+AnalyticsManager.Initialize(new List<IAnalytics>
 {
     new GameAnalyticsEvents(),
     new FirebaseEvents(),
-    new AppMetricaEvents("KEY")
+    new AppMetricaEvents("YOUR_APPMETRICA_API_KEY")
 });
 ```
 See DemoInitCall scene within Demo folder for more details.
