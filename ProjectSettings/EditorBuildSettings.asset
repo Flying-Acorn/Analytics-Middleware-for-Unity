@@ -4,8 +4,5 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes:
-  - enabled: 1
-    path: Assets/FlyingAcorn/Analytics/Demo/DemoInitCall.unity
-    guid: 10dea0392ad0c40bd87f2478f0290df6
+  m_Scenes: []
   m_configObjects: {}

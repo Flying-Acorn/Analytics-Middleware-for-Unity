@@ -1,0 +1,38 @@
+{
+  "name": "com.flyingacorn.analytics-middleware",
+  "version": "1.0.0",
+  "displayName": "Flying Acorn Analytics Middleware",
+  "description": "A unified analytics middleware for Unity supporting Firebase, AppMetrica, and GameAnalytics with GDPR compliance and cross-platform support.",
+  "unity": "2022.3",
+  "documentationUrl": "https://github.com/Flying-Acorn/Analytics-Middleware-for-Unity#readme",
+  "changelogUrl": "https://github.com/Flying-Acorn/Analytics-Middleware-for-Unity/blob/main/README.md",
+  "licensesUrl": "https://github.com/Flying-Acorn/Analytics-Middleware-for-Unity/blob/main/LICENSE",
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "3.2.1"
+  },
+  "keywords": [
+    "analytics",
+    "firebase",
+    "appmetrica",
+    "gameanalytics",
+    "unity",
+    "middleware"
+  ],
+  "author": {
+    "name": "Flying Acorn",
+    "email": "dev@flyingacorn.studio",
+    "url": "https://github.com/Flying-Acorn"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Flying-Acorn/Analytics-Middleware-for-Unity.git",
+    "directory": "Assets/FlyingAcorn/Analytics"
+  },
+  "samples": [
+    {
+      "displayName": "Demo Scene",
+      "description": "Sample scene showing how to initialize and use the analytics middleware",
+      "path": "Samples~/DemoInitCall"
+    }
+  ]
+}

@@ -12,7 +12,7 @@ namespace FlyingAcorn.Analytics.BuildData.Editor
     {
         public int callbackOrder => 0;
         private const string ResourcesFolder = "Assets/Resources";
-        private static readonly string AssetPath = ResourcesFolder + "/" + Constants.BuildSettingsName + ".asset";
+        private static readonly string AssetPath = ResourcesFolder + "/" + global::FlyingAcorn.Analytics.BuildData.Constants.BuildSettingsName + ".asset";
 
         public void OnPreprocessBuild(BuildReport report)
         {
@@ -23,11 +23,11 @@ namespace FlyingAcorn.Analytics.BuildData.Editor
             EnsureIOSOutputDirectoryClean(report);
 
             // Find the BuildData asset by type name (more robust than fully-qualified type in FindAssets)
-            var guids = AssetDatabase.FindAssets($"t:{nameof(BuildData)}");
+            var guids = AssetDatabase.FindAssets($"t:{nameof(global::FlyingAcorn.Analytics.BuildData.BuildData)}");
 
             // Ensure we end up with a BuildData inside Resources so it is available at runtime on device
             string path = null;
-            BuildData buildSettings = null;
+            global::FlyingAcorn.Analytics.BuildData.BuildData buildSettings = null;
 
             if (guids.Length <= 0)
             {
@@ -66,20 +66,20 @@ namespace FlyingAcorn.Analytics.BuildData.Editor
                 if (preferredGuid != null)
                 {
                     path = AssetDatabase.GUIDToAssetPath(preferredGuid);
-                    buildSettings = AssetDatabase.LoadAssetAtPath<BuildData>(path);
+                    buildSettings = AssetDatabase.LoadAssetAtPath<global::FlyingAcorn.Analytics.BuildData.BuildData>(path);
                 }
                 else
                 {
                     // Load the first found and ensure a copy exists at the canonical Resources path
                     var firstPath = AssetDatabase.GUIDToAssetPath(guids[0]);
-                    var firstAsset = AssetDatabase.LoadAssetAtPath<BuildData>(firstPath);
+                    var firstAsset = AssetDatabase.LoadAssetAtPath<global::FlyingAcorn.Analytics.BuildData.BuildData>(firstPath);
                     if (firstAsset == null)
                     {
                         throw new BuildFailedException($"[FABuildTools] Found asset at '{firstPath}' but failed to load as BuildData.");
                     }
 
                     EnsureResourcesFolder();
-                    var existingAtCanonical = AssetDatabase.LoadAssetAtPath<BuildData>(AssetPath);
+                    var existingAtCanonical = AssetDatabase.LoadAssetAtPath<global::FlyingAcorn.Analytics.BuildData.BuildData>(AssetPath);
                     if (existingAtCanonical == null)
                     {
                         // Safer during builds: create a copy at the canonical path instead of moving the original
@@ -87,7 +87,7 @@ namespace FlyingAcorn.Analytics.BuildData.Editor
                         AssetDatabase.CreateAsset(copy, AssetPath);
                         AssetDatabase.SaveAssets();
                         AssetDatabase.Refresh();
-                        buildSettings = AssetDatabase.LoadAssetAtPath<BuildData>(AssetPath);
+                        buildSettings = AssetDatabase.LoadAssetAtPath<global::FlyingAcorn.Analytics.BuildData.BuildData>(AssetPath);
                         if (buildSettings == null)
                         {
                             throw new BuildFailedException($"[FABuildTools] Failed to ensure BuildData at canonical path '{AssetPath}'.");
@@ -111,7 +111,7 @@ namespace FlyingAcorn.Analytics.BuildData.Editor
                 throw new BuildFailedException(
                     $"[FABuildTools] Found asset at '{path}' but failed to load as BuildData. Ensure a BuildData asset exists and matches the type.");
             }
-            
+
             buildSettings.FillCurrentSettings();
             // Ensure BuildNumber reflects the actual target platform being built (not just compile-time defines)
             try
@@ -132,7 +132,7 @@ namespace FlyingAcorn.Analytics.BuildData.Editor
             }
 
             // Only enforce store selection if user has explicitly enabled it
-            if (buildSettings.EnforceStoreOnBuild && buildSettings.StoreName == Constants.Store.Unknown)
+            if (buildSettings.EnforceStoreOnBuild && buildSettings.StoreName == global::FlyingAcorn.Analytics.BuildData.Constants.Store.Unknown)
             {
                 // Do not attempt to show UI in batchmode (e.g., CI/Cloud Build). Force the user to set it beforehand.
                 if (Application.isBatchMode)
@@ -166,27 +166,27 @@ namespace FlyingAcorn.Analytics.BuildData.Editor
 
             switch (buildSettings.StoreName)
             {
-                case Constants.Store.GooglePlay:
-                case Constants.Store.CafeBazaar:
-                case Constants.Store.Myket:
+                case global::FlyingAcorn.Analytics.BuildData.Constants.Store.GooglePlay:
+                case global::FlyingAcorn.Analytics.BuildData.Constants.Store.CafeBazaar:
+                case global::FlyingAcorn.Analytics.BuildData.Constants.Store.Myket:
 #if !UNITY_ANDROID
                     throw new BuildFailedException(
                         "[FABuildTools] Store name is set to Android store but the platform is not Android");
 #else
                     break;
 #endif
-                case Constants.Store.AppStore:
+                case global::FlyingAcorn.Analytics.BuildData.Constants.Store.AppStore:
 #if !UNITY_IOS
                     throw new BuildFailedException("[FABuildTools] Store name is set to iOS store but the platform is not iOS");
 #else
                     break;
 #endif
-                case Constants.Store.BetaChannel:
-                case Constants.Store.Postman:
-                case Constants.Store.Github:
-                case Constants.Store.LandingPage:
+                case global::FlyingAcorn.Analytics.BuildData.Constants.Store.BetaChannel:
+                case global::FlyingAcorn.Analytics.BuildData.Constants.Store.Postman:
+                case global::FlyingAcorn.Analytics.BuildData.Constants.Store.Github:
+                case global::FlyingAcorn.Analytics.BuildData.Constants.Store.LandingPage:
                     break;
-                case Constants.Store.Unknown:
+                case global::FlyingAcorn.Analytics.BuildData.Constants.Store.Unknown:
                     Debug.LogWarning("[FABuildTools] Proceeding with Unknown store. You can set it later via AnalyticsManager.SetStore() at runtime.");
                     break;
                 default:

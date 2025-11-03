@@ -1,0 +1,17 @@
+{
+  "name": "FlyingAcorn.Analytics.Editor",
+  "rootNamespace": "FlyingAcorn.Analytics.BuildData.Editor",
+  "references": [
+    "FlyingAcorn.Analytics"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "noEngineReferences": false
+}

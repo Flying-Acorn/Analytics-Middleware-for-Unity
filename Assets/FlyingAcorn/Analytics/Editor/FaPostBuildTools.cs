@@ -9,7 +9,7 @@ namespace FlyingAcorn.Analytics.BuildData.Editor
     {
         public int callbackOrder { get; }
         private const string ResourcesFolder = "Assets/Resources";
-        private static readonly string AssetPath = ResourcesFolder + "/" + Constants.BuildSettingsName + ".asset";
+        private static readonly string AssetPath = ResourcesFolder + "/" + global::FlyingAcorn.Analytics.BuildData.Constants.BuildSettingsName + ".asset";
 
         public void OnPostprocessBuild(BuildReport report)
         {
@@ -17,40 +17,40 @@ namespace FlyingAcorn.Analytics.BuildData.Editor
                 $"[FABuildTools] OnPostprocessBuild for target {report.summary.platform} at path {report.summary.outputPath}");
 
             // Prefer the canonical Resources path to match pre-build behavior
-            var buildSettings = AssetDatabase.LoadAssetAtPath<BuildData>(AssetPath);
-            
+            var buildSettings = AssetDatabase.LoadAssetAtPath<global::FlyingAcorn.Analytics.BuildData.BuildData>(AssetPath);
+
             if (buildSettings == null)
             {
                 // Fallback: search for any BuildData if canonical path doesn't exist
-                var guids = AssetDatabase.FindAssets($"t:{nameof(BuildData)}");
+                var guids = AssetDatabase.FindAssets($"t:{nameof(global::FlyingAcorn.Analytics.BuildData.BuildData)}");
                 if (guids == null || guids.Length == 0)
                 {
                     Debug.LogWarning("[FABuildTools] No Build Properties found in post-build. This is expected if Analytics module is not used.");
                     return;
                 }
-                
+
                 if (guids.Length > 1)
                 {
                     Debug.LogWarningFormat("[FABuildTools] Found more than 1 Build Properties: {0}. Using first one!", guids.Length);
                 }
-                
+
                 var path = AssetDatabase.GUIDToAssetPath(guids[0]);
-                buildSettings = AssetDatabase.LoadAssetAtPath<BuildData>(path);
-                
+                buildSettings = AssetDatabase.LoadAssetAtPath<global::FlyingAcorn.Analytics.BuildData.BuildData>(path);
+
                 if (buildSettings == null)
                 {
                     Debug.LogError($"[FABuildTools] Found BuildData GUID but failed to load asset at '{path}'.");
                     return;
                 }
             }
-            
+
             if (buildSettings.PreserveStoreAfterBuild)
             {
                 Debug.LogFormat("[FABuildTools] Preserving store setting \"{0}\".", buildSettings.StoreName);
                 return;
             }
-            
-            buildSettings.StoreName = Constants.Store.Unknown;
+
+            buildSettings.StoreName = global::FlyingAcorn.Analytics.BuildData.Constants.Store.Unknown;
             EditorUtility.SetDirty(buildSettings);
             AssetDatabase.SaveAssets();
             Debug.LogFormat("[FABuildTools] Reset store to Unknown in BuildData.");

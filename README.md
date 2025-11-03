@@ -1,10 +1,31 @@
 # Flying Acorn Analytics Middleware
 
 A unified analytics middleware for Unity supporting Firebase, AppMetrica, and GameAnalytics with GDPR compliance and cross-platform support.
+
+## Installation
+
+### Via OpenUPM (Recommended)
+The package is available on the [OpenUPM registry](https://openupm.com/packages/com.flyingacorn.analytics-middleware/).
+
+```bash
+# Install via OpenUPM CLI
+openupm add com.flyingacorn.analytics-middleware
+```
+
+Or add `https://package.openupm.com` as a scoped registry in Unity, then search for `com.flyingacorn.analytics-middleware`.
+
+### Via Git URL
+Add the following Git URL in Unity's Package Manager:
+
+```
+https://github.com/Flying-Acorn/Analytics-Middleware-for-Unity.git?path=Assets/FlyingAcorn/Analytics
+```
+
 ## Dependencies
 
 ### Core
-* [newtonsoft-json](https://docs.unity3d.com/Packages/com.unity.nuget.newtonsoft-json@3.2/manual/index.html)
+* [Newtonsoft JSON](https://docs.unity3d.com/Packages/com.unity.nuget.newtonsoft-json@3.2/manual/index.html) (automatically included)
+
 ### Per Adapter
 #### Firebase
 * [Google External Dependency Manager](https://github.com/googlesamples/unity-jar-resolver)
@@ -47,4 +68,5 @@ AnalyticsManager.Initialize(new List<IAnalytics>
     new AppMetricaEvents("YOUR_APPMETRICA_API_KEY")
 });
 ```
-See DemoInitCall scene within Demo folder for more details.
+
+See the included Demo scene (`Samples~/DemoInitCall`) for a complete example.

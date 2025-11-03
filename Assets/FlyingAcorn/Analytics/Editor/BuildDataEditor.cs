@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace FlyingAcorn.Analytics.BuildData.Editor
 {
-    [CustomEditor(typeof(BuildData))]
+    [CustomEditor(typeof(global::FlyingAcorn.Analytics.BuildData.BuildData))]
     public class BuildDataEditor : UnityEditor.Editor
     {
         private SerializedProperty _storeNameProp;
@@ -27,7 +27,7 @@ namespace FlyingAcorn.Analytics.BuildData.Editor
         {
             serializedObject.Update();
             
-            var buildData = (BuildData)target;
+            var buildData = (global::FlyingAcorn.Analytics.BuildData.BuildData)target;
 
             // Header
             EditorGUILayout.Space(5);
