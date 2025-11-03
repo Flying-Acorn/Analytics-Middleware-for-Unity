@@ -91,6 +91,7 @@ namespace FlyingAcorn.Analytics.Services
 
         public void SetUserIdentifier()
         {
+            if (string.IsNullOrEmpty(AnalyticsPlayerPrefs.CustomUserId)) return;
             AppMetrica.SetUserProfileID(AnalyticsPlayerPrefs.CustomUserId);
         }
 

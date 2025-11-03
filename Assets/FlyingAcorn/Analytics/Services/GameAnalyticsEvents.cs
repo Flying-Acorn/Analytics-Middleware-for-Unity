@@ -87,6 +87,7 @@ namespace FlyingAcorn.Analytics.Services
         public void SetUserIdentifier()
         {
             if (!IsInitialized) return;
+            if (string.IsNullOrEmpty(AnalyticsPlayerPrefs.CustomUserId)) return;
             GameAnalytics.SetCustomId(AnalyticsPlayerPrefs.CustomUserId);
         }
 

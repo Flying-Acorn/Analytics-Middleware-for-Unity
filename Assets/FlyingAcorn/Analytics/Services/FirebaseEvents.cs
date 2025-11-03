@@ -108,6 +108,7 @@ namespace FlyingAcorn.Analytics.Services
         public void SetUserIdentifier()
         {
             if (!IsInitialized) return;
+            if (string.IsNullOrEmpty(AnalyticsPlayerPrefs.CustomUserId)) return;
             var userId = AnalyticsPlayerPrefs.CustomUserId;
             TrySetUserIdentifier(userId);
         }
