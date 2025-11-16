@@ -28,6 +28,7 @@ namespace FlyingAcorn.Analytics.Services
         {
             SetUserIdentifier();
             GameAnalytics.Initialize();
+            SetConsents();
             IsInitialized = true;
         }
 

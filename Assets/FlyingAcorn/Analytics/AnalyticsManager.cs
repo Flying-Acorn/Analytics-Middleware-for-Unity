@@ -399,7 +399,7 @@ namespace FlyingAcorn.Analytics
         /// </summary>
         /// <param name="method">The sign up method.</param>
         /// <param name="extraFields">Additional fields for the event.</param>
-        internal static void SignUpEvent(string method, Dictionary<string, object> extraFields = null)
+        public static void SignUpEvent(string method, Dictionary<string, object> extraFields = null)
         {
             if (!IsReady)
             {

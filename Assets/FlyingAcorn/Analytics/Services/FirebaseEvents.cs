@@ -66,6 +66,7 @@ namespace FlyingAcorn.Analytics.Services
                         Crashlytics.IsCrashlyticsCollectionEnabled = true;
 
                         SetUserIdentifier();
+                        SetConsents();
 
                         _initializationTcs.TrySetResult(true);
                     }
