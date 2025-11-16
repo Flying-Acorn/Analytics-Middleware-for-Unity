@@ -74,7 +74,6 @@ namespace FlyingAcorn.Analytics
             return _services;
         }
 
-        // ATTENTION: DO NOT USE MYDEBUG HERE
         /// <summary>
         /// Sends an error event to all analytics services.
         /// </summary>
