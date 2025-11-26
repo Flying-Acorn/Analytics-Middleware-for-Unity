@@ -10,11 +10,11 @@ using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Events;
 using FirebaseAnalytics = Firebase.Analytics.FirebaseAnalytics;
-using static FlyingAcorn.Analytics.BuildData.Constants;
 using static FlyingAcorn.Analytics.Constants.ErrorSeverity;
 using static FlyingAcorn.Analytics.Constants.ProgressionStatus;
 using static FlyingAcorn.Analytics.Constants.ResourceFlowType;
 using ConsentStatus = Firebase.Analytics.ConsentStatus;
+using static FlyingAcorn.Analytics.Constants;
 
 namespace FlyingAcorn.Analytics.Services
 {
@@ -136,26 +136,33 @@ namespace FlyingAcorn.Analytics.Services
         }
 
         public void BusinessEvent(string currency, decimal amount, string itemType, string itemId, string cartType,
-            Store Store, string receipt = null)
+            PaymentSDK paymentSDK, string receipt = null)
         {
             if (!IsInitialized) return;
-            BusinessEvent(currency, amount, itemType, itemId, cartType, Store, receipt,
+            BusinessEvent(currency, amount, itemType, itemId, cartType, paymentSDK, receipt,
                 new Dictionary<string, object>());
         }
 
+        /// <summary>
+        /// Tracks business events for all payment services.
+        /// For official payment SDKs (Google Play, App Store), manual tracking is skipped
+        /// as Firebase automatically tracks these purchases when properly configured.
+        /// </summary>
         public void BusinessEvent(string currency, decimal amount, string itemType, string itemId, string cartType,
-            Store Store, string receipt, Dictionary<string, object> customData)
+            PaymentSDK paymentSDK, string receipt, Dictionary<string, object> customData)
         {
             if (!IsInitialized) return;
-            if (Store is Store.GooglePlay or Store.AppStore)
-            {
-                MyDebug.Info("Ignoring manual purchase event for Google Play or App Store for Firebase");
-                return;
-            }
 
             if (string.IsNullOrEmpty(currency) || string.IsNullOrEmpty(itemId) || amount <= 0)
             {
-                MyDebug.LogWarning("BusinessEvent: Invalid parameters provided - currency, itemId cannot be null/empty and amount must be > 0");
+                MyDebug.LogWarning($"BusinessEvent: Invalid parameters provided - currency, itemId cannot be null/empty and amount must be > 0. PaymentSDK: {paymentSDK}");
+                return;
+            }
+
+            // Skip manual tracking for official payment services - Firebase handles these automatically
+            if (paymentSDK is PaymentSDK.AppStore or PaymentSDK.GooglePlay)
+            {
+                MyDebug.Info($"[Firebase] Skipping manual tracking for official payment sdk: {paymentSDK}. Firebase automatically tracks purchases when properly configured.");
                 return;
             }
 
@@ -184,7 +191,7 @@ namespace FlyingAcorn.Analytics.Services
                 string parameters = $"Value: {(double)amount}, Currency: {currency}, TransactionID: {receipt ?? $"manual_{DateTime.UtcNow.Ticks}"}, ItemID: {itemId}, StartDate: {DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")}";
                 if (!string.IsNullOrEmpty(itemType)) parameters += $", ItemType: {itemType}";
                 if (!string.IsNullOrEmpty(cartType)) parameters += $", CartType: {cartType}";
-                MyDebug.Info($"[Firebase] Sending BusinessEvent - Parameters: {{{parameters}}}");
+                MyDebug.Info($"[Firebase] Sending BusinessEvent - Parameters: {{{parameters}}}, PaymentSDK: {paymentSDK}");
                 return;
             }
 

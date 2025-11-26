@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
 using Attribute = Io.AppMetrica.Profile.Attribute;
-using static FlyingAcorn.Analytics.BuildData.Constants;
+using static FlyingAcorn.Analytics.Constants;
 
 namespace FlyingAcorn.Analytics.Services
 {
@@ -102,34 +102,38 @@ namespace FlyingAcorn.Analytics.Services
         }
 
         public void BusinessEvent(string currency, decimal amount, string itemType, string itemId, string cartType,
-            Store Store, string receipt = null)
+            PaymentSDK paymentSDK, string receipt = null)
         {
             if (!IsInitialized) return;
-            BusinessEvent(currency, amount, itemType, itemId, cartType, Store, receipt, null);
+            BusinessEvent(currency, amount, itemType, itemId, cartType, paymentSDK, receipt, null);
         }
 
+        /// <summary>
+        /// Tracks business events for all payment services.
+        /// For official payment SDKs (Google Play, App Store), manual tracking is skipped
+        /// if RevenueAutoTrackingEnabled is set to true in AppMetrica configuration.
+        /// </summary>
         public void BusinessEvent(string currency, decimal amount, string itemType, string itemId, string cartType,
-            Store Store, string receipt, Dictionary<string, object> customData)
+            PaymentSDK paymentSDK, string receipt, Dictionary<string, object> customData)
         {
             if (!IsInitialized) return;
 
             // Validate required parameters
             if (string.IsNullOrEmpty(currency) || string.IsNullOrEmpty(itemId) || amount <= 0)
             {
-                MyDebug.LogWarning("BusinessEvent: Invalid parameters - currency and itemId cannot be null/empty, amount must be > 0");
+                MyDebug.LogWarning($"BusinessEvent: Invalid parameters - currency and itemId cannot be null/empty, amount must be > 0. PaymentSDK: {paymentSDK}");
                 return;
             }
 
-            if (AppMetrica.ActivationConfig != null && AppMetrica.ActivationConfig.RevenueAutoTrackingEnabled != null)
+            // Check if automatic tracking is enabled for official payment services
+            if (paymentSDK is PaymentSDK.AppStore or PaymentSDK.GooglePlay)
             {
-                if (AppMetrica.ActivationConfig.RevenueAutoTrackingEnabled.Value)
+                if (AppMetrica.ActivationConfig != null && 
+                    AppMetrica.ActivationConfig.RevenueAutoTrackingEnabled != null &&
+                    AppMetrica.ActivationConfig.RevenueAutoTrackingEnabled.Value)
                 {
-                    if (Store is Store.AppStore or Store.GooglePlay)
-                    {
-                        MyDebug.Info(
-                            "AppMetrica revenue auto tracking is enabled, skipping manual revenue tracking");
-                        return;
-                    }
+                    MyDebug.Info($"[AppMetrica] Skipping manual tracking for official payment sdk: {paymentSDK}. RevenueAutoTrackingEnabled is active.");
+                    return;
                 }
             }
 
@@ -137,7 +141,7 @@ namespace FlyingAcorn.Analytics.Services
             decimal microsDecimal = amount * 1000000m;
             if (microsDecimal > long.MaxValue || microsDecimal < long.MinValue)
             {
-                MyDebug.LogWarning($"BusinessEvent: Amount {amount} would cause overflow in micros conversion");
+                MyDebug.LogWarning($"BusinessEvent: Amount {amount} would cause overflow in micros conversion. PaymentSDK: {paymentSDK}");
                 return;
             }
 
@@ -145,7 +149,7 @@ namespace FlyingAcorn.Analytics.Services
 
             if (AnalyticsPlayerPrefs.UserDebugMode)
             {
-                MyDebug.Info($"[AppMetrica] Sending BusinessEvent - Currency: {currency}, Amount: {amount} ({priceMicros} micros), ItemType: {itemType}, ItemId: {itemId}, CartType: {cartType}, Store: {Store}, Receipt: {receipt ?? "null"}");
+                MyDebug.Info($"[AppMetrica] Sending BusinessEvent - Currency: {currency}, Amount: {amount} ({priceMicros} micros), ItemType: {itemType}, ItemId: {itemId}, CartType: {cartType}, PaymentSDK: {paymentSDK}, Receipt: {receipt ?? "null"}");
                 return;
             }
 

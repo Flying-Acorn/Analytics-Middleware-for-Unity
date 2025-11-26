@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using GameAnalyticsSDK;
 using JetBrains.Annotations;
-using static FlyingAcorn.Analytics.BuildData.Constants;
 using static FlyingAcorn.Analytics.Constants.ProgressionStatus;
 using static FlyingAcorn.Analytics.Constants.ResourceFlowType;
 using static FlyingAcorn.Analytics.Constants.ErrorSeverity;
+using static FlyingAcorn.Analytics.Constants;
 
 namespace FlyingAcorn.Analytics.Services
 {
@@ -87,46 +87,58 @@ namespace FlyingAcorn.Analytics.Services
 
         public void SetUserIdentifier()
         {
-            if (!IsInitialized) return;
             if (string.IsNullOrEmpty(AnalyticsPlayerPrefs.CustomUserId)) return;
             GameAnalytics.SetCustomId(AnalyticsPlayerPrefs.CustomUserId);
         }
 
         public void SetConsents()
         {
-            if (!IsInitialized) return;
             GameAnalytics.SetEnabledEventSubmission(AnalyticsPlayerPrefs.GDPRConsent);
         }
 
         public void BusinessEvent(string currency, decimal amount, string itemType, string itemId, string cartType,
-            Store Store, string receipt = null)
+            PaymentSDK paymentSDK, string receipt = null)
         {
-            BusinessEvent(currency, amount, itemType, itemId, cartType, Store, receipt,
+            BusinessEvent(currency, amount, itemType, itemId, cartType, paymentSDK, receipt,
                 new Dictionary<string, object>());
         }
 
+        /// <summary>
+        /// Tracks business events for all payment services.
+        /// For official payment SDKs (Google Play, App Store), manual tracking is skipped
+        /// as automatic purchase tracking should be enabled in GameAnalytics dashboard.
+        /// </summary>
         public void BusinessEvent(string currency, decimal amount, string itemType, string itemId, string cartType,
-            Store Store, string receipt, Dictionary<string, object> customData)
+            PaymentSDK paymentSDK, string receipt, Dictionary<string, object> customData)
         {
             if (!IsInitialized) return;
 
             // Validate required parameters
             if (string.IsNullOrEmpty(currency) || string.IsNullOrEmpty(itemId) || amount <= 0)
             {
-                MyDebug.LogWarning("BusinessEvent: Invalid parameters - currency and itemId cannot be null/empty, amount must be > 0");
+                MyDebug.LogWarning($"BusinessEvent: Invalid parameters - currency and itemId cannot be null/empty, amount must be > 0. PaymentSDK: {paymentSDK}");
                 return;
             }
 
             // Use decimal rounding for more accurate conversion to cents
-            var GAAmount = decimal.ToInt32(Math.Round(amount * 100));
-
-            if (AnalyticsPlayerPrefs.UserDebugMode)
+            int GAAmount = 0;
+            try
             {
-                MyDebug.Info($"[GameAnalytics] Sending BusinessEvent - Currency: {currency}, Amount: {amount} ({GAAmount} cents), ItemType: {itemType}, ItemId: {itemId}, CartType: {cartType}, Store: {Store}, Receipt: {receipt ?? "null"}");
+                GAAmount = decimal.ToInt32(Math.Round(amount * 100));
+            }
+            catch (OverflowException)
+            {
+                MyDebug.LogError($"[GameAnalytics] BusinessEvent: Amount {amount} is too large for int32 conversion (cents). Event dropped to prevent crash.");
                 return;
             }
 
-            if (Store is Store.AppStore or Store.GooglePlay)
+            if (AnalyticsPlayerPrefs.UserDebugMode)
+            {
+                MyDebug.Info($"[GameAnalytics] Sending BusinessEvent - Currency: {currency}, Amount: {amount} ({GAAmount} cents), ItemType: {itemType}, ItemId: {itemId}, CartType: {cartType}, PaymentSDK: {paymentSDK}, Receipt: {receipt ?? "null"}");
+                return;
+            }
+
+            if (paymentSDK is PaymentSDK.AppStore or PaymentSDK.GooglePlay)
             {
 #if UNITY_ANDROID
                 GameAnalytics.NewBusinessEventGooglePlay(currency, GAAmount, itemType, itemId, cartType, receipt, null);
