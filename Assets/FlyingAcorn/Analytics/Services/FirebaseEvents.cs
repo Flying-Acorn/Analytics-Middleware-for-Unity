@@ -27,7 +27,11 @@ namespace FlyingAcorn.Analytics.Services
         public int EventLengthLimit => 40;
         public int EventStepLengthLimit => -1;
         public string EventSeparator => "_";
+
         public static readonly UnityEvent OnInitialized = new();
+        public static bool IsInitializationComplete { get; private set; }
+
+        public static Task<bool> InitializationTask => _initializationTcs.Task;
 
         private const string GOOGLE_UMP_CONSENT_SETUP_FAILED = "Google UMP consent setup failed";
         private const string FIREBASE_CONSENT_SETUP_FAILED = "Firebase consent setup also failed";
@@ -69,6 +73,8 @@ namespace FlyingAcorn.Analytics.Services
                         SetConsents();
 
                         _initializationTcs.TrySetResult(true);
+                        IsInitializationComplete = true;
+                        OnInitialized?.Invoke();
                     }
                     else
                     {
@@ -86,8 +92,6 @@ namespace FlyingAcorn.Analytics.Services
                     Debug.LogWarning("Firebase dependency check was canceled.");
                     _initializationTcs.TrySetCanceled();
                 }
-
-                OnInitialized?.Invoke();
             }, scheduler);
         }
 
