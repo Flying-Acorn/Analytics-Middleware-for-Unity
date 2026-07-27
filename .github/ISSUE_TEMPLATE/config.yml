@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Provider SDK problems
+    url: https://github.com/Flying-Acorn/Analytics-Middleware-for-Unity#adapters
+    about: Issues inside Firebase, AppMetrica, or GameAnalytics themselves belong in their own trackers — see the adapter links.

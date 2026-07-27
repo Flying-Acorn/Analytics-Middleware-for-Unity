@@ -1,0 +1,64 @@
+name: Bug report
+description: Something doesn't work as documented
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What you expected, and what you got instead. Include console output if you have it.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Initialize with ...
+        2. Call ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: dropdown
+    id: adapters
+    attributes:
+      label: Adapters in use
+      multiple: true
+      options:
+        - Firebase
+        - AppMetrica
+        - GameAnalytics
+        - Custom / own IAnalytics implementation
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      multiple: true
+      options:
+        - Android device
+        - iOS device
+        - Unity Editor
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: unity-version
+    attributes:
+      label: Unity version
+      placeholder: "2022.3.62f3"
+    validations:
+      required: true
+  - type: input
+    id: package-version
+    attributes:
+      label: Middleware version
+      description: Release tag or commit you imported.
+    validations:
+      required: true
+  - type: input
+    id: store
+    attributes:
+      label: Target store
+      placeholder: "GooglePlay / AppStore / CafeBazaar / Myket / ..."
