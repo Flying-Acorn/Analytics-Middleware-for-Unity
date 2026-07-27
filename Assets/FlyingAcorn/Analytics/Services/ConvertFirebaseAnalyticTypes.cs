@@ -62,7 +62,7 @@ namespace FlyingAcorn.Analytics.Services
 
         internal static List<Parameter> MakeParameters(Dictionary<string, object> customFields)
         {
-            return customFields.Select(item => new Parameter(item.Key, item.Value.ToString())).ToList();
+            return customFields.Select(item => new Parameter(item.Key, item.Value?.ToString() ?? string.Empty)).ToList();
         }
 
         internal static string ProgressionNameConvertor(FlyingAcornProgressionStatus progressionStatus)
@@ -100,7 +100,7 @@ namespace FlyingAcorn.Analytics.Services
                     double d => new Parameter(item.Key, d),
                     string s => new Parameter(item.Key, s),
                     long l => new Parameter(item.Key, l),
-                    _ => new Parameter(item.Key, item.Value.ToString())
+                    _ => new Parameter(item.Key, item.Value?.ToString() ?? string.Empty)
                 };
 
                 i++;
