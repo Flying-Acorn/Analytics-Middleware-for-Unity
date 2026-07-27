@@ -112,6 +112,9 @@ namespace FlyingAcorn.Analytics
         public void ResourceEvent(FlyingAcornResourceFlowType flowType, string currency, float amount, string itemType,
             string itemID)
         {
+            if (AnalyticsPlayerPrefs.UserDebugMode)
+                return;
+
             MyDebug.Verbose(
                 $"Sending resource event to analytics: {flowType} with currency: {currency} with amount: " +
                 $"{amount} with itemType: {itemType} with itemID: {itemID} for these services: {GetServiceNames()}");
@@ -148,6 +151,9 @@ namespace FlyingAcorn.Analytics
         public void BusinessEvent(string currency, decimal amount, string itemType, string itemId, string cartType,
             PaymentSDK paymentSDK, string receipt = null)
         {
+            if (AnalyticsPlayerPrefs.UserDebugMode)
+                return;
+
             MyDebug.Verbose($" Sending business event to analytics: {currency} with amount: " +
                             $"{amount} with itemType: {itemType} with itemID: {itemId} with cartType: " +
                             $"{cartType} with receipt: {receipt} for these services: {GetServiceNames()}. PaymentSDK: {paymentSDK}");
@@ -174,6 +180,9 @@ namespace FlyingAcorn.Analytics
         public void BusinessEvent(string currency, decimal amount, string itemType, string itemId, string cartType,
             PaymentSDK paymentSDK, string receipt, Dictionary<string, object> customData)
         {
+            if (AnalyticsPlayerPrefs.UserDebugMode)
+                return;
+
             MyDebug.Info($"Tracking business event to analytics: {currency} with amount: " +
                          $"{amount} with itemType: {itemType} with itemID: {itemId} with cartType: " +
                          $"{cartType} with receipt: {receipt} with customData: {GetNames(customData)}. PaymentSDK: {paymentSDK}");

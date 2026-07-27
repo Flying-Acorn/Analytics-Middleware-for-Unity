@@ -132,12 +132,6 @@ namespace FlyingAcorn.Analytics.Services
                 return;
             }
 
-            if (AnalyticsPlayerPrefs.UserDebugMode)
-            {
-                MyDebug.Info($"[GameAnalytics] Sending BusinessEvent - Currency: {currency}, Amount: {amount} ({GAAmount} cents), ItemType: {itemType}, ItemId: {itemId}, CartType: {cartType}, PaymentSDK: {paymentSDK}, Receipt: {receipt ?? "null"}");
-                return;
-            }
-
             if (paymentSDK is PaymentSDK.AppStore or PaymentSDK.GooglePlay)
             {
 #if UNITY_ANDROID

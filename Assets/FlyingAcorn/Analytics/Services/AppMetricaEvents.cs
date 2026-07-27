@@ -147,12 +147,6 @@ namespace FlyingAcorn.Analytics.Services
 
             var priceMicros = (long)microsDecimal;
 
-            if (AnalyticsPlayerPrefs.UserDebugMode)
-            {
-                MyDebug.Info($"[AppMetrica] Sending BusinessEvent - Currency: {currency}, Amount: {amount} ({priceMicros} micros), ItemType: {itemType}, ItemId: {itemId}, CartType: {cartType}, PaymentSDK: {paymentSDK}, Receipt: {receipt ?? "null"}");
-                return;
-            }
-
             try
             {
                 var yandexAppMetricaRevenue = new Revenue(priceMicros, currency);

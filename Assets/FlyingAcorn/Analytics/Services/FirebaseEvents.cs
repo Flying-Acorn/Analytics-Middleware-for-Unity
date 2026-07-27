@@ -190,15 +190,6 @@ namespace FlyingAcorn.Analytics.Services
             }
 
 
-            if (AnalyticsPlayerPrefs.UserDebugMode)
-            {
-                string parameters = $"Value: {(double)amount}, Currency: {currency}, TransactionID: {receipt ?? $"manual_{DateTime.UtcNow.Ticks}"}, ItemID: {itemId}, StartDate: {DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")}";
-                if (!string.IsNullOrEmpty(itemType)) parameters += $", ItemType: {itemType}";
-                if (!string.IsNullOrEmpty(cartType)) parameters += $", CartType: {cartType}";
-                MyDebug.Info($"[Firebase] Sending BusinessEvent - Parameters: {{{parameters}}}, PaymentSDK: {paymentSDK}");
-                return;
-            }
-
             FirebaseAnalytics.LogEvent(FirebaseAnalytics.EventPurchase, purchaseParameters.ToArray());
         }
 
