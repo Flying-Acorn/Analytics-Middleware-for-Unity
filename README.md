@@ -31,7 +31,7 @@ the differences between them (event-name length limits, separators, enum names, 
 - **GDPR consent + custom user IDs** — set once, propagated to every adapter.
 - **Store awareness** — Google Play, App Store, Cafe Bazaar, Myket, GitHub, and more, enforced at build time.
 - **Build metadata** — build number, scripting backend, and build time captured into a `Resources` asset and attached to events.
-- **Iran-store friendly** — manual revenue tracking for Bazaar/Myket, automatic for official stores.
+- **Alternative-store support** — manual revenue tracking for stores without automatic purchase tracking (e.g. Cafe Bazaar, Myket), automatic for Google Play and the App Store.
 
 ## Requirements
 
@@ -123,7 +123,7 @@ AnalyticsManager.ResourceEvent(
 
 // Business — real-money purchase
 AnalyticsManager.BusinessEvent("USD", 4.99m, "gems", "gem_pack_1", "shop",
-    Constants.PaymentSDK.CafeBazaar, receipt: null, customData: null);
+    Constants.PaymentSDK.GooglePlay, receipt: null, customData: null);
 
 // Errors, sign-ups, segmentation
 AnalyticsManager.ErrorEvent(Constants.ErrorSeverity.FlyingAcornErrorSeverity.WarningSeverity, "save failed");
