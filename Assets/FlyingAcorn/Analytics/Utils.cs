@@ -81,13 +81,17 @@ namespace FlyingAcorn.Analytics
 #endif
 
         /// <summary>
-        /// A cut name can merge with other events into one, so the Editor and development builds warn, once per name;
-        /// a release build only logs (a warning there would also go out as an analytics error event).
+        /// A cut name can merge with other events into one, so the Editor and development builds warn, once per name
+        /// (events may come from any thread); a release build only logs (a warning there would also go out as an
+        /// analytics error event).
         /// </summary>
         private static void WarnCut(string message, string name)
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            if (WarnedCuts.Add(name))
+            bool first;
+            lock (WarnedCuts)
+                first = WarnedCuts.Add(name);
+            if (first)
                 Debug.LogWarning($"[FlyingAcorn Analytics] {message}");
 #endif
             MyDebug.Info(message);
