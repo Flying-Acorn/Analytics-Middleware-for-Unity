@@ -53,7 +53,7 @@ namespace FlyingAcorn.Analytics
                     var eventStep = eventSteps[index];
                     if (eventStep.Length > service.EventStepLengthLimit)
                     {
-                        MyDebug.Info($"Event step is too long for this provider: {eventStep}, slicing it");
+                        WarnCut($"Event step is too long for this provider: {eventStep}, slicing it", eventStep);
                         eventStep = eventStep[..(service.EventStepLengthLimit - 1)];
                     }
 
@@ -66,14 +66,31 @@ namespace FlyingAcorn.Analytics
             if (service.EventLengthLimit >= 0)
             {
                 if (eventName.Length <= service.EventLengthLimit) return eventName;
+                // One shorter than the limit allows; cutting at the limit would rename every event cut so far.
                 var slicedEventName = eventName[..(service.EventLengthLimit - 1)];
-                MyDebug.Info(
-                    $"Event is too long for this provider: {eventName}, slicing it to {slicedEventName}");
+                WarnCut($"Event is too long for this provider: {eventName}, slicing it to {slicedEventName}", eventName);
                 return slicedEventName;
             }
 
             MyDebug.Verbose($"Sending event: {eventName} to {service.GetType().Name}");
             return eventName;
+        }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        private static readonly HashSet<string> WarnedCuts = new();
+#endif
+
+        /// <summary>
+        /// A cut name can merge with other events into one, so the Editor and development builds warn, once per name;
+        /// a release build only logs (a warning there would also go out as an analytics error event).
+        /// </summary>
+        private static void WarnCut(string message, string name)
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (WarnedCuts.Add(name))
+                Debug.LogWarning($"[FlyingAcorn Analytics] {message}");
+#endif
+            MyDebug.Info(message);
         }
 
         public static void Shuffle<T>(this IList<T> list, int? seed = null)
